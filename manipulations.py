@@ -31,12 +31,10 @@ class Manipulations(Enum):
     TRUNCATE_HYPOTHESIS = 11
     # anything -> entailment
     TAUTOLOGY = 12
-    # anything -> entailment / negation
-    TALK_ABOUT = 13
     # anything -> entailment
-    DUPLICATE_HYPOTHESIS = 14
-    #anything -> neg
-    NOT_EXIST = 15
+    DUPLICATE_HYPOTHESIS = 13
+    # anything -> negation
+    CHANGE_NUMBERS = 14
 
 
 def negate_part_premise(sample):
@@ -216,11 +214,27 @@ def get_random_noun():
     return noun.lemmas()[0].name()
 
 
-
 def truncate_hypothesis(sample):
     span = sample['srl']['hypothesis']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
     new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['hypothesis']['tokens'][:span]])
     return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'ENTAILMENT'}
 
 
+def tautology(sample):
+    adj = get_random_adjective()
+    noun = get_random_noun()
+    new_hypothesis = f"A {adj} {noun} is {adj}."
+    return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'ENTAILMENT'}
 
+
+def duplicate_hypothesis(sample):
+    return {'premise': sample['hypothesis'], 'hypothesis': sample['hypothesis'], 'label': 'ENTAILMENT'}
+
+
+
+def change_numbers(sample):
+    # rewrite-------------------------------------------
+    for word_info in sample['wsd']['hypothesis']:
+        if word_info['pos'] == 'NUM':
+            new_hypothesis = new_hypothesis.replace(word_info['rawText'], str(random.randint(0, 100)))
+    return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'NEGATION'}

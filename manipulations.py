@@ -33,7 +33,7 @@ class Manipulations(Enum):
     TAUTOLOGY = 12
     # anything -> entailment
     DUPLICATE_HYPOTHESIS = 13
-    # anything -> negation
+    # entailment -> negation/entailment
     CHANGE_NUMBERS = 14
 
 
@@ -231,10 +231,20 @@ def duplicate_hypothesis(sample):
     return {'premise': sample['hypothesis'], 'hypothesis': sample['hypothesis'], 'label': 'ENTAILMENT'}
 
 
+def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
+    old_num = int(sample['wsd']['hypothesis'][numeric_id]['rawText'])
+    if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
+        new_num = random.randint(0, old_num - 1)
+    elif comparator == -1 and chosen_manipulation == 'ENTAILMENT':
+        new_num = random.randint(old_num + 1, old_num + 1000)
+    elif comparator == 0:
+        new_num = random.choice([random.randint(0, old_num - 1), random.randint(old_num + 1, old_num + 1000)])
+    elif comparator == 1:
+        new_num = random.randint(old_num * 100 + 1, old_num * 100 + 1000)
+    else:
+        new_num = random.randint(0, old_num // 100)
 
-def change_numbers(sample):
-    # rewrite-------------------------------------------
-    for word_info in sample['wsd']['hypothesis']:
-        if word_info['pos'] == 'NUM':
-            new_hypothesis = new_hypothesis.replace(word_info['rawText'], str(random.randint(0, 100)))
-    return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'NEGATION'}
+    return {'premise': sample['premise'], 'hypothesis': ' '.join([
+        str(new_num) if word['index'] == numeric_id else word['rawText'] for word in
+        sample['srl']['hypothesis']['tokens']
+    ]), 'label': 'NEGATION'}

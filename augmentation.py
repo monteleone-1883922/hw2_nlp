@@ -23,26 +23,13 @@ def choose_manipulation(sample, proportions: list):
         manipulations_list += PRODUCE_ENTAILMENT_LIST
         manipulation_output = 'ENTAILMENT'
         proportions[0] += 1
-        for word_info in sample['wsd']['hypothesis']:
-            if word_info['pos'] == 'NUM':
-                numeric_id = word_info['index']
-                break
-            elif word_info['rawText'] in MAJORITY_COMPARATORS:
-                comparator = 1
-            elif word_info['rawText'] in MINORITY_COMPARATORS:
-                comparator = -1
+        numeric_id, comparator = isNumeric(sample)
+
     elif rnd < (proportions[0] + proportions[1]) / sum_proportions:
         manipulations_list += PRODUCE_NEGATION_LIST
         proportions[1] += 1
         manipulation_output = 'NEGATION'
-        for word_info in sample['wsd']['hypothesis']:
-            if word_info['pos'] == 'NUM':
-                numeric_id = word_info['index']
-                break
-            elif word_info['rawText'] in MAJORITY_COMPARATORS:
-                comparator = 1
-            elif word_info['rawText'] in MINORITY_COMPARATORS:
-                comparator = -1
+        numeric_id, comparator = isNumeric(sample)
     else:
         manipulations_list += PRODUCE_NEUTRAL_LIST
         proportions[2] += 1
@@ -61,6 +48,19 @@ def choose_manipulation(sample, proportions: list):
 
     return random.choice(manipulation_values), manipulation_output, (numeric_id, comparator)
 
+
+def isNumeric(sample):
+    numeric_id = -1
+    comparator = 0
+    for word_info in sample['wsd']['hypothesis']:
+        if word_info['pos'] == 'NUM':
+            numeric_id = word_info['index']
+            break
+        elif word_info['text'] in MAJORITY_COMPARATORS:
+            comparator = 1
+        elif word_info['text'] in MINORITY_COMPARATORS:
+            comparator = -1
+    return numeric_id, comparator
 
 def augment_data(data, num_new_samples):
     new_data = []

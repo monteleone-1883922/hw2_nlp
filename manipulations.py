@@ -232,7 +232,7 @@ def duplicate_hypothesis(sample):
 
 
 def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
-    old_num = int(sample['wsd']['hypothesis'][numeric_id]['rawText'])
+    old_num = int(sample['wsd']['hypothesis'][numeric_id]['text'])
     if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
         new_num = random.randint(0, old_num - 1)
     elif comparator == -1 and chosen_manipulation == 'ENTAILMENT':

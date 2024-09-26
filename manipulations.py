@@ -111,12 +111,12 @@ def use_hyponym(sample):
             }
 
 
-def switch_data(sample1, data, keys):
-    sample2 = extract_sample(data, keys)
+def switch_data(sample1, data):
+    sample2 = extract_sample(data)
     return {'premise': sample1['premise'], 'hypothesis': sample2['hypothesis'], 'label': 'NEUTRAL'}
 
 
-def extract_sample(data: dict, keys: list):
+def extract_sample(data: dict):
     """
     Extracts a sample from a dictionary based on the keys.
 
@@ -128,7 +128,7 @@ def extract_sample(data: dict, keys: list):
     i = 0
     sample = None
     while not extraction_done:
-        sample = random.choice(keys)
+        sample = random.randint(0, len(data) - 1)
         rand = random.random()
         if data[sample] > rand or i >= MAX_ITERATIONS:
             extraction_done = True
@@ -137,8 +137,8 @@ def extract_sample(data: dict, keys: list):
     return sample
 
 
-def switch_partial_data(sample1, data, keys):
-    sample2 = extract_sample(data, keys)
+def switch_partial_data(sample1, data):
+    sample2 = extract_sample(data)
     rnd = random.randint(0, 1)
     samples = [sample1, sample2]
     # premise --------
@@ -248,3 +248,37 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
         str(new_num) if word['index'] == numeric_id else word['rawText'] for word in
         sample['srl']['hypothesis']['tokens']
     ]), 'label': 'NEGATION'}
+
+
+def exec_manipulation(sample, manipulation, manipulation_output, numeric, data):
+    if manipulation == Manipulations.NEGATE_PART_PREMISE:
+        return negate_part_premise(sample)
+    elif manipulation == Manipulations.SYNONYM:
+        return use_synonym(sample)
+    elif manipulation == Manipulations.ANTINOMY_PART_PREMISE:
+        return use_antinomy(sample)
+    elif manipulation == Manipulations.HYPONYM_PREMISE:
+        return use_hyponym(sample)
+    elif manipulation == Manipulations.SWITCH_DATA:
+        return switch_data(sample, data)
+    elif manipulation == Manipulations.SWITCH_PARTIAL_DATA:
+        return switch_partial_data(sample, data)
+    elif manipulation == Manipulations.TAKE_PART_PREMISE:
+        return take_part_premise(sample)
+    elif manipulation == Manipulations.NEGATE_HYPOTHESIS:
+        return negate_hypothesis(sample)
+    elif manipulation == Manipulations.HYPERNYM_HYPOTHESIS:
+        return hypernym_hypothesis(sample)
+    elif manipulation == Manipulations.IMPOSSIBILITY:
+        return impossibility(sample)
+    elif manipulation == Manipulations.TRUNCATE_HYPOTHESIS:
+        return truncate_hypothesis(sample)
+    elif manipulation == Manipulations.TAUTOLOGY:
+        return tautology(sample)
+    elif manipulation == Manipulations.DUPLICATE_HYPOTHESIS:
+        return duplicate_hypothesis(sample)
+    elif manipulation == Manipulations.CHANGE_NUMBERS:
+        return change_numbers(sample, *numeric, manipulation_output)
+    else:
+        print("ERROR: unknown manipulation")
+        exit(1)

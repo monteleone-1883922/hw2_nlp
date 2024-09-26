@@ -1,5 +1,4 @@
-import random
-from manipulations import Manipulations
+from manipulations import *
 
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
                            Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS]
@@ -7,7 +6,6 @@ PRODUCE_NEUTRAL_LIST = [Manipulations.SWITCH_DATA, Manipulations.SWITCH_PARTIAL_
 PRODUCE_NEGATION_LIST = [Manipulations.NEGATE_PART_PREMISE, Manipulations.ANTINOMY_PART_PREMISE,
                          Manipulations.IMPOSSIBILITY, Manipulations.NEGATE_HYPOTHESIS, Manipulations.CHANGE_NUMBERS]
 PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, Manipulations.HYPERNYM_HYPOTHESIS]
-
 
 MAJORITY_COMPARATORS = ['more', 'larger', 'higher', 'longer', 'taller', 'older']
 MINORITY_COMPARATORS = ['less', 'fewer', 'smaller', 'lower', 'shorter', 'younger']
@@ -23,7 +21,7 @@ def choose_manipulation(sample, proportions: list):
     sum_proportions = sum(proportions)
     if rnd < proportions[0] / sum_proportions:
         manipulations_list += PRODUCE_ENTAILMENT_LIST
-        chosen_manipulation = 'ENTAILMENT'
+        manipulation_output = 'ENTAILMENT'
         proportions[0] += 1
         for word_info in sample['wsd']['hypothesis']:
             if word_info['pos'] == 'NUM':
@@ -36,7 +34,7 @@ def choose_manipulation(sample, proportions: list):
     elif rnd < (proportions[0] + proportions[1]) / sum_proportions:
         manipulations_list += PRODUCE_NEGATION_LIST
         proportions[1] += 1
-        chosen_manipulation = 'NEGATION'
+        manipulation_output = 'NEGATION'
         for word_info in sample['wsd']['hypothesis']:
             if word_info['pos'] == 'NUM':
                 numeric_id = word_info['index']
@@ -48,19 +46,37 @@ def choose_manipulation(sample, proportions: list):
     else:
         manipulations_list += PRODUCE_NEUTRAL_LIST
         proportions[2] += 1
-        chosen_manipulation = 'NEUTRAL'
-
-
-
+        manipulation_output = 'NEUTRAL'
 
     for manipulation in manipulations_list:
-        if not (label != 'ENTAILMENT' and (manipulation == Manipulations.TRUNCATE_HYPOTHESIS or manipulation == Manipulations.CHANGE_NUMBERS)) and \
-                not ((label == chosen_manipulation or label == 'NEUTRAL') and manipulation == Manipulations.NEGATE_HYPOTHESIS) and \
+        if not (label != 'ENTAILMENT' and (
+                manipulation == Manipulations.TRUNCATE_HYPOTHESIS or manipulation == Manipulations.CHANGE_NUMBERS)) and \
+                not ((label == manipulation_output or label == 'NEUTRAL') and manipulation == Manipulations.NEGATE_HYPOTHESIS) and \
                 not (manipulation == Manipulations.CHANGE_NUMBERS and numeric_id == -1) and \
-                not (chosen_manipulation == 'ENTAILMENT' and manipulation == Manipulations.CHANGE_NUMBERS and comparator == 0):
+                not (manipulation_output == 'ENTAILMENT' and manipulation == Manipulations.CHANGE_NUMBERS and comparator == 0):
             manipulation_values.append(manipulation)
 
-    if label == chosen_manipulation:
+    if label == manipulation_output:
         manipulation_values += PRODUCE_ANYTHING_LIST
 
-    return random.choice(manipulation_values), chosen_manipulation, (numeric_id, comparator)
+    return random.choice(manipulation_values), manipulation_output, (numeric_id, comparator)
+
+
+def augment_data(data, num_new_samples):
+    new_data = []
+    proportions = [0, 0, 0]
+    indices = {}
+    for i, sample in enumerate(data):
+        indices[i] = 1
+        if sample['label'] == 'ENTAILMENT':
+            proportions[0] += 1
+        elif sample['label'] == 'NEGATION':
+            proportions[1] += 1
+        else:
+            proportions[2] += 1
+    for _ in range(num_new_samples):
+        sample = data[extract_sample(indices)]
+        manipulation, output, numeric_info = choose_manipulation(sample, proportions)
+        new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices)
+        new_data.append(new_sample)
+    data += new_data

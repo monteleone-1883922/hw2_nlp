@@ -111,8 +111,8 @@ def use_hyponym(sample):
             }
 
 
-def switch_data(sample1, data):
-    sample2 = extract_sample(data)
+def switch_data(sample1, data, samples):
+    sample2 = samples[extract_sample(data)]
     return {'premise': sample1['premise'], 'hypothesis': sample2['hypothesis'], 'label': 'NEUTRAL'}
 
 
@@ -137,8 +137,8 @@ def extract_sample(data: dict):
     return sample
 
 
-def switch_partial_data(sample1, data):
-    sample2 = extract_sample(data)
+def switch_partial_data(sample1, data, samples):
+    sample2 = samples[extract_sample(data)]
     rnd = random.randint(0, 1)
     samples = [sample1, sample2]
     # premise --------
@@ -250,7 +250,7 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     ]), 'label': 'NEGATION'}
 
 
-def exec_manipulation(sample, manipulation, manipulation_output, numeric, data):
+def exec_manipulation(sample, manipulation, manipulation_output, numeric, data, samples):
     if manipulation == Manipulations.NEGATE_PART_PREMISE:
         return negate_part_premise(sample)
     elif manipulation == Manipulations.SYNONYM:
@@ -260,9 +260,9 @@ def exec_manipulation(sample, manipulation, manipulation_output, numeric, data):
     elif manipulation == Manipulations.HYPONYM_PREMISE:
         return use_hyponym(sample)
     elif manipulation == Manipulations.SWITCH_DATA:
-        return switch_data(sample, data)
+        return switch_data(sample, data, samples)
     elif manipulation == Manipulations.SWITCH_PARTIAL_DATA:
-        return switch_partial_data(sample, data)
+        return switch_partial_data(sample, data, samples)
     elif manipulation == Manipulations.TAKE_PART_PREMISE:
         return take_part_premise(sample)
     elif manipulation == Manipulations.NEGATE_HYPOTHESIS:

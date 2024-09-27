@@ -77,6 +77,6 @@ def augment_data(data, num_new_samples):
     for _ in range(num_new_samples):
         sample = data[extract_sample(indices)]
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
-        new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices)
+        new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         new_data.append(new_sample)
     data += new_data

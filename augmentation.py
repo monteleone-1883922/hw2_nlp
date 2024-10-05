@@ -92,9 +92,10 @@ def augment_data(data: Dataset, num_new_samples: int):
         sample = data[extract_sample(indices)]
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
-        new_premises.append(new_sample['premise'])
-        new_hypotheses.append(new_sample['hypothesis'])
-        new_labels.append(new_sample['label'])
+        if new_sample is not None:
+            new_premises.append(new_sample['premise'])
+            new_hypotheses.append(new_sample['hypothesis'])
+            new_labels.append(new_sample['label'])
 
     new_data_dataset = Dataset.from_dict({
         'premise': new_premises,
@@ -149,10 +150,12 @@ def augment_data_multithread(data : Dataset, num_new_samples: int):
         results = executor.map(augment_sample, range(num_new_samples))
 
     # Popola le liste new_premises, new_hypotheses, new_labels con i risultati
-    for premise, hypothesis, label in results:
-        new_premises.append(premise)
-        new_hypotheses.append(hypothesis)
-        new_labels.append(label)
+    for result in results:
+        if result is not None:
+            premise, hypothesis, label = result
+            new_premises.append(premise)
+            new_hypotheses.append(hypothesis)
+            new_labels.append(label)
 
     # Crea il dataset per i nuovi campioni
     new_data_dataset = Dataset.from_dict({

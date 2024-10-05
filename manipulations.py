@@ -98,7 +98,7 @@ def use_antinomy(sample):
 def use_hyponym(sample):
     candidates = []
     for word_info in sample['wsd']['premise']:
-        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O' and word_info['pos'] == 'NOUN':
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.hyponyms()) > 0:
                 candidates.append(word_info)
@@ -195,7 +195,7 @@ def negate_hypothesis(sample):
 def hypernym_hypothesis(sample):
     candidates = []
     for word_info in sample['wsd']['hypothesis']:
-        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O' and word_info['pos'] == 'NOUN':
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.hypernyms()) > 0:
                 candidates.append(word_info)

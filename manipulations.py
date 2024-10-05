@@ -49,7 +49,7 @@ def use_synonym(sample):
     part = random.choice(['premise', 'hypothesis'])
     candidates = []
     for word_info in sample['wsd'][part]:
-        if word_info['nltkSynset'] is not None and word_info['text'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.lemmas()) > 1:
                 candidates.append(word_info)
@@ -95,7 +95,7 @@ def use_antinomy(sample):
 def use_hyponym(sample):
     candidates = []
     for word_info in sample['wsd']['premise']:
-        if word_info['nltkSynset'] is not None and word_info['text'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.hyponyms()) > 0:
                 candidates.append(word_info)

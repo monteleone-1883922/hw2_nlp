@@ -117,7 +117,7 @@ def augment_data(data: Dataset, num_new_samples: int):
         'label': labels + new_labels
     })
 
-    return data, new_data_dataset
+    return data, new_data_dataset, manipulation_info
 
 
 def augment_data_multithread(data : Dataset, num_new_samples: int):

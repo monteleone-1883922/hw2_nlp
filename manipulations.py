@@ -8,11 +8,11 @@ MIN_DIFFERENCE_HYPOTHESIS = 2
 
 
 class Manipulations(Enum):
-    # anything -> negation
+    # anything -> CONTRADICTION
     NEGATE_PART_PREMISE = 1
     # anything -> same thing
     SYNONYM = 2
-    # anything -> negation
+    # anything -> CONTRADICTION
     ANTINOMY_PART_PREMISE = 3
     # anything -> same thing
     HYPONYM_PREMISE = 4
@@ -22,11 +22,11 @@ class Manipulations(Enum):
     SWITCH_PARTIAL_DATA = 6
     # anything -> entailment
     TAKE_PART_PREMISE = 7
-    # entailment/negation -> opposite
+    # entailment/CONTRADICTION -> opposite
     NEGATE_HYPOTHESIS = 8
     # anything -> same thing
     HYPERNYM_HYPOTHESIS = 9
-    # anything -> negation
+    # anything -> CONTRADICTION
     IMPOSSIBILITY = 10
     # entailment -> entailment
     TRUNCATE_HYPOTHESIS = 11
@@ -34,7 +34,7 @@ class Manipulations(Enum):
     TAUTOLOGY = 12
     # anything -> entailment
     DUPLICATE_HYPOTHESIS = 13
-    # entailment -> negation/entailment
+    # entailment -> CONTRADICTION/entailment
     CHANGE_NUMBERS = 14
 
 
@@ -189,7 +189,7 @@ def negate_hypothesis(sample):
         exit(1)
     new_hypothesis = 'Is not true that ' + sample['hypothesis']
     return {'premise': sample['premise'], 'hypothesis': new_hypothesis,
-            'label': 'NEGATION' if sample['label'] == 'ENTAILMENT' else 'ENTAILMENT'}
+            'label': 'CONTRADICTION' if sample['label'] == 'ENTAILMENT' else 'ENTAILMENT'}
 
 
 def hypernym_hypothesis(sample):
@@ -215,7 +215,7 @@ def impossibility(sample):
     adj = get_random_adjective()
     noun = get_random_noun()
     new_hypothesis = f"A {adj} {noun} is not {adj}."
-    return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'NEGATION'}
+    return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'CONTRADICTION'}
 
 
 def get_random_adjective():
@@ -266,7 +266,7 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     return {'premise': sample['premise'], 'hypothesis': ' '.join([
         str(new_num) if word['index'] == numeric_id else word['rawText'] for word in
         sample['srl']['hypothesis']['tokens']
-    ]), 'label': 'NEGATION'}
+    ]), 'label': 'CONTRADICTION'}
 
 
 def exec_manipulation(sample, manipulation, manipulation_output, numeric, data, samples):

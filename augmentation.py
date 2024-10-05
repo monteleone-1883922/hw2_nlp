@@ -7,7 +7,7 @@ from datasets import Dataset
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
                            Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS]
 PRODUCE_NEUTRAL_LIST = [Manipulations.SWITCH_DATA, Manipulations.SWITCH_PARTIAL_DATA, Manipulations.CHANGE_NUMBERS]
-PRODUCE_NEGATION_LIST = [Manipulations.NEGATE_PART_PREMISE, Manipulations.ANTINOMY_PART_PREMISE,
+PRODUCE_CONTRADICTION_LIST = [Manipulations.NEGATE_PART_PREMISE, Manipulations.ANTINOMY_PART_PREMISE,
                          Manipulations.IMPOSSIBILITY, Manipulations.NEGATE_HYPOTHESIS, Manipulations.CHANGE_NUMBERS]
 PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, Manipulations.HYPERNYM_HYPOTHESIS]
 
@@ -32,9 +32,9 @@ def choose_manipulation(sample, proportions: list):
         numeric_id, comparator = isNumeric(sample)
 
     elif rnd < (proportions[0] + proportions[1]) / sum_proportions:
-        manipulations_list += PRODUCE_NEGATION_LIST
+        manipulations_list += PRODUCE_CONTRADICTION_LIST
         proportions[1] += 1
-        manipulation_output = 'NEGATION'
+        manipulation_output = 'CONTRADICTION'
         numeric_id, comparator = isNumeric(sample)
     else:
         manipulations_list += PRODUCE_NEUTRAL_LIST
@@ -90,7 +90,7 @@ def augment_data(data: Dataset, num_new_samples: int):
         indices[i] = 1
         if sample['label'] == 'ENTAILMENT':
             proportions[0] += 1
-        elif sample['label'] == 'NEGATION':
+        elif sample['label'] == 'CONTRADICTION':
             proportions[1] += 1
         else:
             proportions[2] += 1
@@ -155,7 +155,7 @@ def augment_data_multithread(data : Dataset, num_new_samples: int):
         indices[i] = 1
         if sample['label'] == 'ENTAILMENT':
             proportions[0] += 1
-        elif sample['label'] == 'NEGATION':
+        elif sample['label'] == 'CONTRADICTION':
             proportions[1] += 1
         else:
             proportions[2] += 1

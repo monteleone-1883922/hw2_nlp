@@ -4,6 +4,7 @@ import random
 
 MAX_ITERATIONS = 50
 MAX_LOOK_FOR_SPAN = 3
+MIN_DIFFERENCE_HYPOTHESIS = 2
 
 
 class Manipulations(Enum):
@@ -231,7 +232,8 @@ def get_random_noun():
 
 def truncate_hypothesis(sample):
     span = extract_span(sample, 'hypothesis')
-    if span == len(sample['srl']['hypothesis']['tokens']):
+
+    if span >= len(sample['srl']['hypothesis']['tokens']) - MIN_DIFFERENCE_HYPOTHESIS or span == -1:
         return None
     new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['hypothesis']['tokens'][:span]])
     return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'ENTAILMENT'}

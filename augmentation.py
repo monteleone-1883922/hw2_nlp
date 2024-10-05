@@ -68,10 +68,18 @@ def isNumeric(sample):
 
 def augment_data(data: Dataset, num_new_samples: int):
     nltk.download('wordnet')
-    new_data = []
+    premises = []
+    hypotheses = []
+    labels = []
+    new_premises = []
+    new_hypotheses = []
+    new_labels = []
     proportions = [0, 0, 0]
     indices = {}
     for i, sample in enumerate(data):
+        premises.append(sample['premise'])
+        hypotheses.append(sample['hypothesis'])
+        labels.append(sample['label'])
         indices[i] = 1
         if sample['label'] == 'ENTAILMENT':
             proportions[0] += 1
@@ -84,25 +92,41 @@ def augment_data(data: Dataset, num_new_samples: int):
         sample = data[extract_sample(indices)]
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
-        new_data.append(new_sample)
+        new_premises.append(new_sample['premise'])
+        new_hypotheses.append(new_sample['hypothesis'])
+        new_labels.append(new_sample['label'])
 
     new_data_dataset = Dataset.from_dict({
-        'data': new_data  # Supponendo che results contenga nuovi campioni strutturati
+        'premise': new_premises,
+        'hypothesis': new_hypotheses,
+        'label': new_labels
     })
 
-    # Concatena i dataset
-    data = Dataset.concatenate([data, new_data_dataset])
+    data = Dataset.from_dict({
+        'premise': premises + new_premises,
+        'hypothesis': hypotheses + new_hypotheses,
+        'label': labels + new_labels
+    })
+
     return data, new_data_dataset
 
 
 def augment_data_multithread(data : Dataset, num_new_samples: int):
     nltk.download('wordnet')
-    new_data = []
+    premises = []
+    hypotheses = []
+    labels = []
+    new_premises = []
+    new_hypotheses = []
+    new_labels = []
     proportions = [0, 0, 0]
     indices = {}
 
     # Primo for, non c'è bisogno di parallelizzarlo
     for i, sample in enumerate(data):
+        premises.append(sample['premise'])
+        hypotheses.append(sample['hypothesis'])
+        labels.append(sample['label'])
         indices[i] = 1
         if sample['label'] == 'ENTAILMENT':
             proportions[0] += 1
@@ -113,24 +137,37 @@ def augment_data_multithread(data : Dataset, num_new_samples: int):
 
     # Funzione da eseguire in parallelo
     def augment_sample(i):
-        sample = data[extract_sample(indices)]
+        sample = data[extract_sample(indices)]  # Estrae un campione dalla lista originale
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
-        return new_sample
+
+        # Ritorna i valori delle colonne del nuovo campione
+        return new_sample['premise'], new_sample['hypothesis'], new_sample['label']
 
     # Parallelizzazione del secondo for
     with concurrent.futures.ThreadPoolExecutor() as executor:
         results = executor.map(augment_sample, range(num_new_samples))
 
-    # Aggiungi i nuovi campioni ai dati originali
+    # Popola le liste new_premises, new_hypotheses, new_labels con i risultati
+    for premise, hypothesis, label in results:
+        new_premises.append(premise)
+        new_hypotheses.append(hypothesis)
+        new_labels.append(label)
 
-    new_data.extend(results)
+    # Crea il dataset per i nuovi campioni
     new_data_dataset = Dataset.from_dict({
-        'data': new_data  # Supponendo che results contenga nuovi campioni strutturati
+        'premise': new_premises,
+        'hypothesis': new_hypotheses,
+        'label': new_labels
     })
 
-    # Concatena i dataset
-    data = Dataset.concatenate([data, new_data_dataset])
+    # Crea il dataset completo concatenando i vecchi e nuovi campioni
+    data = Dataset.from_dict({
+        'premise': premises + new_premises,
+        'hypothesis': hypotheses + new_hypotheses,
+        'label': labels + new_labels
+    })
+
     return data, new_data_dataset
 
 

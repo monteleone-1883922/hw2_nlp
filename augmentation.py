@@ -85,9 +85,14 @@ def augment_data(data: Dataset, num_new_samples: int):
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         new_data.append(new_sample)
-    data = data.tolist()
-    data += new_data
-    return Dataset.from_list(data), new_data
+
+    new_data_dataset = Dataset.from_dict({
+        'data': new_data  # Supponendo che results contenga nuovi campioni strutturati
+    })
+
+    # Concatena i dataset
+    data = Dataset.concatenate([data, new_data_dataset])
+    return data, new_data_dataset
 
 
 def augment_data_multithread(data : Dataset, num_new_samples: int):
@@ -118,10 +123,15 @@ def augment_data_multithread(data : Dataset, num_new_samples: int):
         results = executor.map(augment_sample, range(num_new_samples))
 
     # Aggiungi i nuovi campioni ai dati originali
-    data = data.tolist()
+
     new_data.extend(results)
-    data += new_data
-    return Dataset.from_list(data), new_data
+    new_data_dataset = Dataset.from_dict({
+        'data': new_data  # Supponendo che results contenga nuovi campioni strutturati
+    })
+
+    # Concatena i dataset
+    data = Dataset.concatenate([data, new_data_dataset])
+    return data, new_data_dataset
 
 
 

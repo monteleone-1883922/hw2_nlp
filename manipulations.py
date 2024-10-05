@@ -1,5 +1,4 @@
 from enum import Enum
-import nltk
 from nltk.corpus import wordnet as wn
 import random
 

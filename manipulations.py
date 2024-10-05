@@ -178,7 +178,7 @@ def negate_hypothesis(sample):
 def hypernym_hypothesis(sample):
     candidates = []
     for word_info in sample['wsd']['hypothesis']:
-        if word_info['nltkSynset'] is not None and word_info['text'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.hypernyms()) > 0:
                 candidates.append(word_info)

@@ -76,6 +76,7 @@ def augment_data(data: Dataset, num_new_samples: int):
     new_labels = []
     proportions = [0, 0, 0]
     indices = {}
+    augment_methods = []
     for i, sample in enumerate(data):
         premises.append(sample['premise'])
         hypotheses.append(sample['hypothesis'])
@@ -96,11 +97,13 @@ def augment_data(data: Dataset, num_new_samples: int):
             new_premises.append(new_sample['premise'])
             new_hypotheses.append(new_sample['hypothesis'])
             new_labels.append(new_sample['label'])
+            augment_methods.append(manipulation)
 
     new_data_dataset = Dataset.from_dict({
         'premise': new_premises,
         'hypothesis': new_hypotheses,
-        'label': new_labels
+        'label': new_labels,
+        'augment_method': augment_methods
     })
 
     data = Dataset.from_dict({

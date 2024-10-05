@@ -11,6 +11,8 @@ PRODUCE_NEGATION_LIST = [Manipulations.NEGATE_PART_PREMISE, Manipulations.ANTINO
                          Manipulations.IMPOSSIBILITY, Manipulations.NEGATE_HYPOTHESIS, Manipulations.CHANGE_NUMBERS]
 PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, Manipulations.HYPERNYM_HYPOTHESIS]
 
+MAX_TRIALS_SAMPLE = 3
+
 MAJORITY_COMPARATORS = ['more', 'larger', 'higher', 'longer', 'taller', 'older']
 MINORITY_COMPARATORS = ['less', 'fewer', 'smaller', 'lower', 'shorter', 'younger']
 
@@ -95,11 +97,16 @@ def augment_data(data: Dataset, num_new_samples: int):
         print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
         old_sample = data[extract_sample(indices)]
         sample = old_sample.copy()
-        manipulation, output, numeric_info = choose_manipulation(sample, proportions)
-        if manipulation.name not in manipulation_info:
-            manipulation_info[manipulation.name] = {'count': 0, 'success': 0}
-        manipulation_info[manipulation.name]['count'] += 1
-        new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
+        produced = False
+        trials = 0
+        while not produced:
+            manipulation, output, numeric_info = choose_manipulation(sample, proportions)
+            if manipulation.name not in manipulation_info:
+                manipulation_info[manipulation.name] = {'count': 0, 'success': 0}
+            manipulation_info[manipulation.name]['count'] += 1
+            new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
+            produced = new_sample is not None or trials > MAX_TRIALS_SAMPLE
+            trials += 1
         if new_sample is not None:
             old_premises.append(old_sample['premise'])
             old_hypotheses.append(old_sample['hypothesis'])

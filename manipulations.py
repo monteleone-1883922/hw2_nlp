@@ -215,6 +215,8 @@ def get_random_noun():
 
 def truncate_hypothesis(sample):
     span = sample['srl']['hypothesis']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+    if span == len(sample['srl']['hypothesis']['tokens']):
+        return None
     new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['hypothesis']['tokens'][:span]])
     return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'ENTAILMENT'}
 

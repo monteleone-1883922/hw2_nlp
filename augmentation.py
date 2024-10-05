@@ -97,7 +97,7 @@ def augment_data(data: Dataset, num_new_samples: int):
             new_premises.append(new_sample['premise'])
             new_hypotheses.append(new_sample['hypothesis'])
             new_labels.append(new_sample['label'])
-            augment_methods.append(manipulation)
+            augment_methods.append(manipulation.name)
 
     new_data_dataset = Dataset.from_dict({
         'premise': new_premises,

@@ -75,7 +75,7 @@ def use_antinomy(sample):
     for word in sample['wsd']['premise']:
         if word['pos'] == 'VERB' and word['nltkSynset'] != 'O' and word['nltkSynset'] is not None:
             i = 0
-            while new_word == '' and i < len(wn.synsethypo(word['nltkSynset']).lemmas()):
+            while new_word == '' and i < len(wn.synset(word['nltkSynset']).lemmas()):
                 if wn.synset(word['nltkSynset']).lemmas()[i].antonyms():
                     new_word = random.choice(wn.synset(word['nltkSynset']).lemmas()[i].antonyms()).name()
 

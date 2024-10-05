@@ -52,7 +52,7 @@ def use_synonym(sample):
     part = random.choice(['premise', 'hypothesis'])
     candidates = []
     for word_info in sample['wsd'][part]:
-        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O':
+        if word_info['nltkSynset'] is not None and word_info['nltkSynset'] != 'O' and word_info['pos'] in ['NOUN', 'VERB']:
             synset = wn.synset(word_info['nltkSynset'])
             if len(synset.lemmas()) > 1:
                 candidates.append(word_info)

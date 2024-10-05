@@ -3,6 +3,7 @@ from nltk.corpus import wordnet as wn
 import random
 
 MAX_ITERATIONS = 50
+MAX_LOOK_FOR_SPAN = 3
 
 
 class Manipulations(Enum):
@@ -38,7 +39,9 @@ class Manipulations(Enum):
 
 def negate_part_premise(sample):
     premise = sample['premise']
-    span = sample['srl']['premise']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+    span = extract_span(sample, 'premise')
+    if span == -1:
+        return None
     new_hypothesis = 'Is not true that ' + ' '.join(
         [word['rawText'] for word in sample['srl']['premise']['tokens'][:span]])
     return {'premise': premise, 'hypothesis': new_hypothesis, 'label': sample['label']}
@@ -135,6 +138,15 @@ def extract_sample(data: dict):
         i += 1
     return sample
 
+def extract_span(sample, part):
+    span = -1
+    i = 0
+    while span == -1 and i < MAX_LOOK_FOR_SPAN:
+        if (len(sample['srl'][part]['annotations'][0]['englishPropbank']['roles']) != 0):
+            span = sample['srl'][part]['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+        i += 0
+    return span
+
 
 def switch_partial_data(sample1, data, samples):
     sample2 = samples[extract_sample(data)]
@@ -144,7 +156,9 @@ def switch_partial_data(sample1, data, samples):
     sample = samples[rnd]
     new_sample_premise = random.choice(['premise', 'hypothesis'])
     if new_sample_premise == 'premise':
-        span = sample['srl']['premise']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+        span = extract_span(sample, 'premise')
+        if span == -1:
+            return None
         new_premise = ' '.join([word['rawText'] for word in sample['srl']['premise']['tokens'][:span]])
     else:
         new_premise = sample['hypothesis']
@@ -152,7 +166,9 @@ def switch_partial_data(sample1, data, samples):
     sample = samples[1 - rnd]
     new_sample_hypothesis = random.choice(['premise', 'hypothesis'])
     if new_sample_hypothesis == 'premise':
-        span = sample['srl']['premise']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+        span = extract_span(sample, 'premise')
+        if span == -1:
+            return None
         new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['premise']['tokens'][:span]])
     else:
         new_hypothesis = sample['hypothesis']
@@ -161,7 +177,7 @@ def switch_partial_data(sample1, data, samples):
 
 
 def take_part_premise(sample):
-    span = sample['srl']['premise']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+    span = extract_span(sample, 'premise')
     new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['premise']['tokens'][:span]])
     return {'premise': sample['premise'], 'hypothesis': new_hypothesis, 'label': 'ENTAILMENT'}
 
@@ -214,7 +230,7 @@ def get_random_noun():
 
 
 def truncate_hypothesis(sample):
-    span = sample['srl']['hypothesis']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+    span = extract_span(sample, 'hypothesis')
     if span == len(sample['srl']['hypothesis']['tokens']):
         return None
     new_hypothesis = ' '.join([word['rawText'] for word in sample['srl']['hypothesis']['tokens'][:span]])

@@ -94,6 +94,7 @@ def augment_data(data: Dataset, num_new_samples: int):
             proportions[1] += 1
         else:
             proportions[2] += 1
+    print("\n", proportions)
     for i in range(num_new_samples):
         print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
         old_sample = data[extract_sample(indices)]

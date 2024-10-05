@@ -69,7 +69,7 @@ def use_synonym(sample):
 
 
 def use_antinomy(sample):
-    span = sample['srl']['premise']['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
+    span = extract_span(sample, 'premise')
     new_word = ''
     new_word_idx = -1
     for word in sample['wsd']['premise']:

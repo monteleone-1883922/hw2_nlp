@@ -63,6 +63,7 @@ def isNumeric(sample):
     return numeric_id, comparator
 
 def augment_data(data, num_new_samples):
+    nltk.download('wordnet')
     new_data = []
     proportions = [0, 0, 0]
     indices = {}

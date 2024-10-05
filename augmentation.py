@@ -87,7 +87,7 @@ def augment_data(data: Dataset, num_new_samples: int):
         new_data.append(new_sample)
     data = data.tolist()
     data += new_data
-    return Dataset.from_list(data)
+    return Dataset.from_list(data), new_data
 
 
 def augment_data_multithread(data : Dataset, num_new_samples: int):
@@ -121,7 +121,7 @@ def augment_data_multithread(data : Dataset, num_new_samples: int):
     data = data.tolist()
     new_data.extend(results)
     data += new_data
-    return Dataset.from_list(data)
+    return Dataset.from_list(data), new_data
 
 
 

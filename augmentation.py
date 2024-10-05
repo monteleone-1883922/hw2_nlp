@@ -93,15 +93,16 @@ def augment_data(data: Dataset, num_new_samples: int):
             proportions[2] += 1
     for i in range(num_new_samples):
         print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
-        sample = data[extract_sample(indices)]
+        old_sample = data[extract_sample(indices)]
+        sample = old_sample.copy()
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         if manipulation.name not in manipulation_info:
             manipulation_info[manipulation.name] = {'count': 0, 'success': 0}
         manipulation_info[manipulation.name]['count'] += 1
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         if new_sample is not None:
-            old_premises.append(sample['premise'])
-            old_hypotheses.append(sample['hypothesis'])
+            old_premises.append(old_sample['premise'])
+            old_hypotheses.append(old_sample['hypothesis'])
             manipulation_info[manipulation.name]['success'] += 1
             new_premises.append(new_sample['premise'])
             new_hypotheses.append(new_sample['hypothesis'])

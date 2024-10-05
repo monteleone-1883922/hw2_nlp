@@ -77,6 +77,8 @@ def augment_data(data: Dataset, num_new_samples: int):
     proportions = [0, 0, 0]
     indices = {}
     augment_methods = []
+    old_premises = []
+    old_hypotheses = []
     manipulation_info = {}
     for i, sample in enumerate(data):
         premises.append(sample['premise'])
@@ -98,6 +100,8 @@ def augment_data(data: Dataset, num_new_samples: int):
         manipulation_info[manipulation.name]['count'] += 1
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         if new_sample is not None:
+            old_premises.append(sample['premise'])
+            old_hypotheses.append(sample['hypothesis'])
             manipulation_info[manipulation.name]['success'] += 1
             new_premises.append(new_sample['premise'])
             new_hypotheses.append(new_sample['hypothesis'])
@@ -108,7 +112,9 @@ def augment_data(data: Dataset, num_new_samples: int):
         'premise': new_premises,
         'hypothesis': new_hypotheses,
         'label': new_labels,
-        'augment_method': augment_methods
+        'augment_method': augment_methods,
+        'old_premise': old_premises,
+        'old_hypothesis': old_hypotheses
     })
 
     data = Dataset.from_dict({

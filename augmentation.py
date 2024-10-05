@@ -83,6 +83,7 @@ def augment_data(data: Dataset, num_new_samples: int):
     old_hypotheses = []
     manipulation_info = {}
     for i, sample in enumerate(data):
+        print_progress_bar(i / len(data), text=f" Processing initial dataset ")
         premises.append(sample['premise'])
         hypotheses.append(sample['hypothesis'])
         labels.append(sample['label'])

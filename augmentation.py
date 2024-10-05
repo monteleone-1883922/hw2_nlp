@@ -75,9 +75,18 @@ def augment_data(data, num_new_samples):
             proportions[1] += 1
         else:
             proportions[2] += 1
-    for _ in range(num_new_samples):
+    for i in range(num_new_samples):
+        print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
         sample = data[extract_sample(indices)]
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         new_data.append(new_sample)
     data += new_data
+
+
+
+def print_progress_bar(percentuale: float, lunghezza_barra: int = 30, text: str="") -> None:
+    blocchi_compilati = int(lunghezza_barra * percentuale)
+    barra = "[" + "=" * (blocchi_compilati - 1) + ">" + " " * (lunghezza_barra - blocchi_compilati) + "]"
+    sys.stdout.write(f"\r{barra} {percentuale * 100:.2f}% complete " + text)
+    sys.stdout.flush()

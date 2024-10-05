@@ -2,6 +2,7 @@ from manipulations import *
 import sys
 import nltk
 import concurrent.futures
+from datasets import Dataset
 
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
                            Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS]
@@ -65,7 +66,7 @@ def isNumeric(sample):
             comparator = -1
     return numeric_id, comparator
 
-def augment_data(data, num_new_samples):
+def augment_data(data: Dataset, num_new_samples: int):
     nltk.download('wordnet')
     new_data = []
     proportions = [0, 0, 0]
@@ -84,10 +85,12 @@ def augment_data(data, num_new_samples):
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         new_data.append(new_sample)
+    data = data.tolist()
     data += new_data
+    return Dataset.from_list(data)
 
 
-def augment_data_multithread(data, num_new_samples):
+def augment_data_multithread(data : Dataset, num_new_samples: int):
     nltk.download('wordnet')
     new_data = []
     proportions = [0, 0, 0]
@@ -105,7 +108,6 @@ def augment_data_multithread(data, num_new_samples):
 
     # Funzione da eseguire in parallelo
     def augment_sample(i):
-        print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
         sample = data[extract_sample(indices)]
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
@@ -116,8 +118,10 @@ def augment_data_multithread(data, num_new_samples):
         results = executor.map(augment_sample, range(num_new_samples))
 
     # Aggiungi i nuovi campioni ai dati originali
+    data = data.tolist()
     new_data.extend(results)
     data += new_data
+    return Dataset.from_list(data)
 
 
 

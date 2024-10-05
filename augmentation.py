@@ -1,6 +1,7 @@
 from manipulations import *
 import sys
 import nltk
+import concurrent.futures
 
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
                            Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS]
@@ -83,6 +84,39 @@ def augment_data(data, num_new_samples):
         manipulation, output, numeric_info = choose_manipulation(sample, proportions)
         new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
         new_data.append(new_sample)
+    data += new_data
+
+
+def augment_data_multithread(data, num_new_samples):
+    nltk.download('wordnet')
+    new_data = []
+    proportions = [0, 0, 0]
+    indices = {}
+
+    # Primo for, non c'è bisogno di parallelizzarlo
+    for i, sample in enumerate(data):
+        indices[i] = 1
+        if sample['label'] == 'ENTAILMENT':
+            proportions[0] += 1
+        elif sample['label'] == 'NEGATION':
+            proportions[1] += 1
+        else:
+            proportions[2] += 1
+
+    # Funzione da eseguire in parallelo
+    def augment_sample(i):
+        print_progress_bar(i / num_new_samples, text=f" Augmenting data ")
+        sample = data[extract_sample(indices)]
+        manipulation, output, numeric_info = choose_manipulation(sample, proportions)
+        new_sample = exec_manipulation(sample, manipulation, output, numeric_info, indices, data)
+        return new_sample
+
+    # Parallelizzazione del secondo for
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = executor.map(augment_sample, range(num_new_samples))
+
+    # Aggiungi i nuovi campioni ai dati originali
+    new_data.extend(results)
     data += new_data
 
 

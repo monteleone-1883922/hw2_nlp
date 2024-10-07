@@ -82,6 +82,7 @@ def augment_data(data: Dataset, num_new_samples: int):
     old_premises = []
     old_hypotheses = []
     manipulation_info = {}
+    old_labels = []
     for i, sample in enumerate(data):
         print_progress_bar(i / len(data), text=f" Processing initial dataset ")
         premises.append(sample['premise'])
@@ -112,6 +113,7 @@ def augment_data(data: Dataset, num_new_samples: int):
         if new_sample is not None:
             old_premises.append(old_sample['premise'])
             old_hypotheses.append(old_sample['hypothesis'])
+            old_labels.append(old_sample['label'])
             manipulation_info[manipulation.name]['success'] += 1
             new_premises.append(new_sample['premise'])
             new_hypotheses.append(new_sample['hypothesis'])
@@ -124,7 +126,8 @@ def augment_data(data: Dataset, num_new_samples: int):
         'label': new_labels,
         'augment_method': augment_methods,
         'old_premise': old_premises,
-        'old_hypothesis': old_hypotheses
+        'old_hypothesis': old_hypotheses,
+        'old_label': old_labels
     })
 
     data = Dataset.from_dict({

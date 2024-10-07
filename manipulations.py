@@ -1,6 +1,7 @@
 from enum import Enum
 from nltk.corpus import wordnet as wn
 import random
+from word2number import w2n
 
 MAX_ITERATIONS = 50
 MAX_LOOK_FOR_SPAN = 3
@@ -66,6 +67,18 @@ def use_synonym(sample):
         sample['srl'][part]['tokens']
     ])
     return new_sample
+
+
+def convert_to_number(text):
+    try:
+        # Prova a convertire direttamente se è già un numero
+        return int(text)
+    except:
+        # Se non è un numero, prova a convertirlo da parole a numeri
+        try:
+            return w2n.word_to_num(text)
+        except:
+            return None
 
 
 def use_antinomy(sample):
@@ -138,6 +151,7 @@ def extract_sample(data: dict):
             data[sample] /= 2
         i += 1
     return sample
+
 
 def extract_span(sample, part):
     span = -1
@@ -251,7 +265,9 @@ def duplicate_hypothesis(sample):
 
 
 def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
-    old_num = int(sample['wsd']['hypothesis'][numeric_id]['text'])
+    old_num = convert_to_number(sample['wsd']['hypothesis'][numeric_id]['text'])
+    if old_num is None:
+        return None
     if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
         new_num = random.randint(0, old_num - 1)
     elif comparator == -1 and chosen_manipulation == 'ENTAILMENT':

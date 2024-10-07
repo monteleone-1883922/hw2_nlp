@@ -268,14 +268,18 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     old_num = convert_to_number(sample['wsd']['hypothesis'][numeric_id]['text'])
     if old_num is None:
         return None
+    # more than
     if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
         new_num = random.randint(0, old_num - 1)
+    # less than
     elif comparator == -1 and chosen_manipulation == 'ENTAILMENT':
         new_num = random.randint(old_num + 1, old_num + 1000)
     elif comparator == 0:
         new_num = random.choice([random.randint(0, old_num - 1), random.randint(old_num + 1, old_num + 1000)])
+    # more than
     elif comparator == 1:
         new_num = random.randint(old_num * 100 + 1, old_num * 100 + 1000)
+    # less than
     else:
         new_num = random.randint(0, old_num // 100)
 

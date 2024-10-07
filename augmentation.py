@@ -13,7 +13,7 @@ PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, M
 
 MAX_TRIALS_SAMPLE = 3
 
-MAJORITY_COMPARATORS = ['more', 'larger', 'higher', 'longer', 'taller', 'older']
+MAJORITY_COMPARATORS = ['more', 'larger', 'higher', 'longer', 'taller', 'older', 'faster']
 MINORITY_COMPARATORS = ['less', 'fewer', 'smaller', 'lower', 'shorter', 'younger']
 
 

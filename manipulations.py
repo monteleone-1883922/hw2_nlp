@@ -157,7 +157,7 @@ def extract_span(sample, part):
     span = -1
     i = 0
     while span == -1 and i < MAX_LOOK_FOR_SPAN:
-        if (len(sample['srl'][part]['annotations'][0]['englishPropbank']['roles']) != 0):
+        if len(sample['srl'][part]['annotations']) != 0 and len(sample['srl'][part]['annotations'][0]['englishPropbank']['roles']) != 0:
             span = sample['srl'][part]['annotations'][0]['englishPropbank']['roles'][-1]['span'][-1]
         i += 1
     return span

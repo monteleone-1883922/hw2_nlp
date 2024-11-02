@@ -48,7 +48,7 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
         if not (label != 'ENTAILMENT' and (
                 manipulation == Manipulations.TRUNCATE_HYPOTHESIS or manipulation == Manipulations.CHANGE_NUMBERS)) and \
                 not ((label == manipulation_output or label == 'NEUTRAL') and manipulation == Manipulations.NEGATE_HYPOTHESIS) and \
-                not (manipulation == Manipulations.CHANGE_NUMBERS and numeric_id == -1) and \
+                not ((manipulation == Manipulations.CHANGE_NUMBERS or Manipulations.CONVERT_NUMBERS) and numeric_id == -1) and \
                 not (manipulation_output == 'ENTAILMENT' and manipulation == Manipulations.CHANGE_NUMBERS and comparator == 0) and \
                 not ((manipulation == Manipulations.TAUTOLOGY or manipulation == Manipulations.IMPOSSIBILITY) and use_tautology_impossibility < 0.4):
             manipulation_values.append(manipulation)
@@ -65,7 +65,7 @@ def isNumeric(sample):
     numeric_id = -1
     comparator = 0
     for word_info in sample['wsd']['hypothesis']:
-        if word_info['pos'] == 'NUM' and word_info['text'].strip() != '.':
+        if word_info['pos'] == 'NUM':
             numeric_id = word_info['index']
             break
         elif word_info['text'] in MAJORITY_COMPARATORS:

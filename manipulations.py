@@ -2,6 +2,7 @@ from enum import Enum
 from nltk.corpus import wordnet as wn
 import random
 from word2number import w2n
+from num2words import num2words
 
 MAX_ITERATIONS = 50
 MAX_LOOK_FOR_SPAN = 3
@@ -37,6 +38,8 @@ class Manipulations(Enum):
     DUPLICATE_HYPOTHESIS = 13
     # entailment -> CONTRADICTION/entailment
     CHANGE_NUMBERS = 14
+    # anything -> same thing
+    CONVERT_NUMBERS = 15
 
 
 def negate_part_premise(sample):
@@ -289,6 +292,20 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     ]), 'label': 'CONTRADICTION'}
 
 
+def convert_numbers(sample, numeric_id, target_label):
+    input_string = sample['wsd']['hypothesis'][numeric_id]['text']
+    if input_string.isdigit():
+        # Converti il numero in parole
+        number = num2words(int(input_string))
+    # Converti le parole in numero
+    else:
+        number = str(w2n.word_to_num(input_string))
+    return {'premise': sample['premise'], 'hypothesis': ' '.join([
+        str(number) if word['index'] == numeric_id else word['rawText'] for word in
+        sample['srl']['hypothesis']['tokens']
+    ]), 'label': target_label}
+
+
 def exec_manipulation(sample, manipulation, manipulation_output, numeric, data, samples):
     if manipulation == Manipulations.NEGATE_PART_PREMISE:
         return negate_part_premise(sample)
@@ -318,6 +335,8 @@ def exec_manipulation(sample, manipulation, manipulation_output, numeric, data, 
         return duplicate_hypothesis(sample)
     elif manipulation == Manipulations.CHANGE_NUMBERS:
         return change_numbers(sample, *numeric, manipulation_output)
+    elif manipulation == Manipulations.CONVERT_NUMBERS:
+        return convert_numbers(sample, numeric[0], manipulation_output)
     else:
         print("ERROR: unknown manipulation")
         exit(1)

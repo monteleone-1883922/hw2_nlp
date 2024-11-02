@@ -3,15 +3,15 @@ from pprint import pprint
 from manipulations import *
 import sys
 import nltk
-#import concurrent.futures
+import concurrent.futures
 from datasets import Dataset
 
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
-                           Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS]
-PRODUCE_NEUTRAL_LIST = [Manipulations.SWITCH_DATA, Manipulations.SWITCH_PARTIAL_DATA, Manipulations.CHANGE_NUMBERS]
+                           Manipulations.NEGATE_HYPOTHESIS, Manipulations.DUPLICATE_HYPOTHESIS,  Manipulations.CHANGE_NUMBERS]
+PRODUCE_NEUTRAL_LIST = [Manipulations.SWITCH_DATA, Manipulations.SWITCH_PARTIAL_DATA]
 PRODUCE_CONTRADICTION_LIST = [Manipulations.NEGATE_PART_PREMISE, Manipulations.ANTINOMY_PART_PREMISE,
                          Manipulations.IMPOSSIBILITY, Manipulations.NEGATE_HYPOTHESIS, Manipulations.CHANGE_NUMBERS]
-PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, Manipulations.HYPERNYM_HYPOTHESIS]
+PRODUCE_ANYTHING_LIST = [Manipulations.SYNONYM, Manipulations.HYPONYM_PREMISE, Manipulations.HYPERNYM_HYPOTHESIS, Manipulations.CONVERT_NUMBERS]
 
 MAX_TRIALS_SAMPLE = 3
 
@@ -25,21 +25,18 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
     label = sample['label']
     rnd = random.random()
     manipulations_list = []
-    numeric_id = -1
-    comparator = 0
     sum_proportions = sum(1 / p for p in proportions)
     probs = [(1 / p) / sum_proportions for p in proportions]
+    numeric_id, comparator = isNumeric(sample)
     if rnd < probs[0]:
         manipulations_list += PRODUCE_ENTAILMENT_LIST
         manipulation_output = 'ENTAILMENT'
         proportions[0] += 1
-        numeric_id, comparator = isNumeric(sample)
 
     elif rnd < probs[0] + probs[1]:
         manipulations_list += PRODUCE_CONTRADICTION_LIST
         proportions[1] += 1
         manipulation_output = 'CONTRADICTION'
-        numeric_id, comparator = isNumeric(sample)
     else:
         manipulations_list += PRODUCE_NEUTRAL_LIST
         proportions[2] += 1
@@ -67,9 +64,6 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
 def isNumeric(sample):
     numeric_id = -1
     comparator = 0
-    if 'wsd' not in sample:
-        pprint(sample)
-        return numeric_id, comparator
     for word_info in sample['wsd']['hypothesis']:
         if word_info['pos'] == 'NUM':
             numeric_id = word_info['index']

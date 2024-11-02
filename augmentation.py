@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from manipulations import *
 import sys
 import nltk
@@ -65,6 +67,7 @@ def isNumeric(sample):
     numeric_id = -1
     comparator = 0
     if 'wsd' not in sample:
+        pprint(sample)
         return numeric_id, comparator
     for word_info in sample['wsd']['hypothesis']:
         if word_info['pos'] == 'NUM':

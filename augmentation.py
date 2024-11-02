@@ -17,8 +17,9 @@ MAJORITY_COMPARATORS = ['more', 'larger', 'higher', 'longer', 'taller', 'older',
 MINORITY_COMPARATORS = ['less', 'fewer', 'smaller', 'lower', 'shorter', 'younger']
 
 
-def choose_manipulation(sample, proportions: list):
+def choose_manipulation(sample, proportions: list, probabilities: dict = None):
     manipulation_values = []
+    manipulation_probabilities = []
     label = sample['label']
     rnd = random.random()
     manipulations_list = []
@@ -41,6 +42,8 @@ def choose_manipulation(sample, proportions: list):
         proportions[2] += 1
         manipulation_output = 'NEUTRAL'
     use_tautology_impossibility = random.random()
+    if label == manipulation_output:
+        manipulations_list += PRODUCE_ANYTHING_LIST
     for manipulation in manipulations_list:
         if not (label != 'ENTAILMENT' and (
                 manipulation == Manipulations.TRUNCATE_HYPOTHESIS or manipulation == Manipulations.CHANGE_NUMBERS)) and \
@@ -49,11 +52,13 @@ def choose_manipulation(sample, proportions: list):
                 not (manipulation_output == 'ENTAILMENT' and manipulation == Manipulations.CHANGE_NUMBERS and comparator == 0) and \
                 not ((manipulation == Manipulations.TAUTOLOGY or manipulation == Manipulations.IMPOSSIBILITY) and use_tautology_impossibility < 0.4):
             manipulation_values.append(manipulation)
+            if probabilities is not None:
+                manipulation_probabilities.append(probabilities[manipulation.name])
+            else:
+                manipulation_probabilities.append(1)
 
-    if label == manipulation_output:
-        manipulation_values += PRODUCE_ANYTHING_LIST
-
-    return random.choice(manipulation_values), manipulation_output, (numeric_id, comparator)
+    manipulation_probs = [x/sum(manipulation_probabilities) for x in manipulation_probabilities]
+    return random.choices(manipulation_values, weights=manipulation_probs, k=1)[0], manipulation_output, (numeric_id, comparator)
 
 
 def isNumeric(sample):
@@ -70,7 +75,7 @@ def isNumeric(sample):
     return numeric_id, comparator
 
 
-def augment_data(data: Dataset, num_new_samples: int):
+def augment_data(data: Dataset, num_new_samples: int, probabilities: dict = None):
     nltk.download('wordnet')
     premises = []
     hypotheses = []
@@ -105,7 +110,7 @@ def augment_data(data: Dataset, num_new_samples: int):
         produced = False
         trials = 0
         while not produced:
-            manipulation, output, numeric_info = choose_manipulation(sample, proportions)
+            manipulation, output, numeric_info = choose_manipulation(sample, proportions, probabilities)
             if manipulation.name not in manipulation_info:
                 manipulation_info[manipulation.name] = {'count': 0, 'success': 0}
             manipulation_info[manipulation.name]['count'] += 1

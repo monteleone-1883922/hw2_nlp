@@ -65,7 +65,7 @@ def isNumeric(sample):
     numeric_id = -1
     comparator = 0
     for word_info in sample['wsd']['hypothesis']:
-        if word_info['pos'] == 'NUM':
+        if word_info['pos'] == 'NUM' and word_info['text'].strip() != '.':
             numeric_id = word_info['index']
             break
         elif word_info['text'] in MAJORITY_COMPARATORS:

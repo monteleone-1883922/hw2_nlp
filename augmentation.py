@@ -64,6 +64,8 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
 def isNumeric(sample):
     numeric_id = -1
     comparator = 0
+    if 'wsd' not in sample:
+        return numeric_id, comparator
     for word_info in sample['wsd']['hypothesis']:
         if word_info['pos'] == 'NUM':
             numeric_id = word_info['index']

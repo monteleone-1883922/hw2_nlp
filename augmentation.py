@@ -26,13 +26,13 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
     numeric_id = -1
     comparator = 0
     sum_proportions = sum(proportions)
-    if rnd < proportions[0] / sum_proportions:
+    if rnd < 1 - proportions[0] / sum_proportions:
         manipulations_list += PRODUCE_ENTAILMENT_LIST
         manipulation_output = 'ENTAILMENT'
         proportions[0] += 1
         numeric_id, comparator = isNumeric(sample)
 
-    elif rnd < (proportions[0] + proportions[1]) / sum_proportions:
+    elif rnd < 1 - (proportions[0] + proportions[1]) / sum_proportions:
         manipulations_list += PRODUCE_CONTRADICTION_LIST
         proportions[1] += 1
         manipulation_output = 'CONTRADICTION'

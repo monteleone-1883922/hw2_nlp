@@ -270,6 +270,7 @@ def duplicate_hypothesis(sample):
 def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     old_num = convert_to_number(sample['wsd']['hypothesis'][numeric_id]['text'])
     if old_num is None:
+        print('\nfailed number: ', sample['wsd']['hypothesis'][numeric_id]['text'])
         return None
     # more than
     if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
@@ -294,16 +295,20 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
 
 def convert_numbers(sample, numeric_id, target_label):
     input_string = sample['wsd']['hypothesis'][numeric_id]['text']
-    if input_string.isdigit():
-        # Converti il numero in parole
-        number = num2words(int(input_string))
-    # Converti le parole in numero
-    else:
-        number = str(w2n.word_to_num(input_string))
-    return {'premise': sample['premise'], 'hypothesis': ' '.join([
-        str(number) if word['index'] == numeric_id else word['rawText'] for word in
-        sample['srl']['hypothesis']['tokens']
-    ]), 'label': target_label}
+    try:
+        if input_string.isdigit():
+            # Converti il numero in parole
+            number = num2words(int(input_string))
+        # Converti le parole in numero
+        else:
+            number = str(w2n.word_to_num(input_string))
+        return {'premise': sample['premise'], 'hypothesis': ' '.join([
+            str(number) if word['index'] == numeric_id else word['rawText'] for word in
+            sample['srl']['hypothesis']['tokens']
+        ]), 'label': target_label}
+    except:
+        print('\nfailed number: ', input_string)
+        return None
 
 
 def exec_manipulation(sample, manipulation, manipulation_output, numeric, data, samples):

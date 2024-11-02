@@ -269,8 +269,8 @@ def duplicate_hypothesis(sample):
 
 def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     old_num = convert_to_number(sample['wsd']['hypothesis'][numeric_id]['text'])
-    if old_num is None:
-        print('\nfailed number: ', sample['wsd']['hypothesis'][numeric_id]['text'])
+    if old_num is None or old_num == 0:
+        #print('\nfailed number: ', sample['wsd']['hypothesis'][numeric_id]['text'])
         return None
     # more than
     if comparator == 1 and chosen_manipulation == 'ENTAILMENT':
@@ -279,7 +279,7 @@ def change_numbers(sample, numeric_id, comparator, chosen_manipulation):
     elif comparator == -1 and chosen_manipulation == 'ENTAILMENT':
         new_num = random.randint(old_num + 1, old_num + 1000)
     elif comparator == 0:
-        new_num = random.choice([random.randint(0, old_num - 1), random.randint(old_num + 1, old_num + 1000)])
+        new_num = random.choice([0 if old_num <= 1 else random.randint(0, old_num - 1), random.randint(old_num + 1, old_num + 1000)])
     # more than
     elif comparator == 1:
         new_num = random.randint(old_num * 100 + 1, old_num * 100 + 1000)
@@ -307,7 +307,7 @@ def convert_numbers(sample, numeric_id, target_label):
             sample['srl']['hypothesis']['tokens']
         ]), 'label': target_label}
     except:
-        print('\nfailed number: ', input_string)
+        #print('\nfailed number: ', input_string)
         return None
 
 

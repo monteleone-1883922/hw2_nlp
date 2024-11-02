@@ -3,7 +3,7 @@ from pprint import pprint
 from manipulations import *
 import sys
 import nltk
-import concurrent.futures
+#import concurrent.futures
 from datasets import Dataset
 
 PRODUCE_ENTAILMENT_LIST = [Manipulations.TAKE_PART_PREMISE, Manipulations.TRUNCATE_HYPOTHESIS, Manipulations.TAUTOLOGY,
@@ -27,14 +27,15 @@ def choose_manipulation(sample, proportions: list, probabilities: dict = None):
     manipulations_list = []
     numeric_id = -1
     comparator = 0
-    sum_proportions = sum(proportions)
-    if rnd < 1 - proportions[0] / sum_proportions:
+    sum_proportions = sum(1 / p for p in proportions)
+    probs = [(1 / p) / sum_proportions for p in proportions]
+    if rnd < probs[0]:
         manipulations_list += PRODUCE_ENTAILMENT_LIST
         manipulation_output = 'ENTAILMENT'
         proportions[0] += 1
         numeric_id, comparator = isNumeric(sample)
 
-    elif rnd < 1 - (proportions[0] + proportions[1]) / sum_proportions:
+    elif rnd < probs[0] + probs[1]:
         manipulations_list += PRODUCE_CONTRADICTION_LIST
         proportions[1] += 1
         manipulation_output = 'CONTRADICTION'
